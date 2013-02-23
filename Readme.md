@@ -23,5 +23,70 @@ The library consists of 2 files:
 	- `fixed_point.hpp` (the primary file to #include)
 	- `template_utils.hpp` (some stuff that fixed_point.hpp needs)
 
-In addition there is the 3rd file, `examples.cpp` which contains a `main()` that illustrates the use of the library.
+In addition there is the 3rd file, `examples.cpp` which contains a `main()` that illustrates the use of the library:
 
+```C++
+int main()
+{
+    // A fixed-point number in Q4.4 signed format (its always signed), with value "5"
+    FixedPoint<4,4> a = 5;
+
+    PRINT_VAL(a); // 5.00
+
+    // Move radix point left 1 bit (right shift by 1 bit)
+    FixedPoint<3,5> b = a.rightShift<1>();
+
+    PRINT_VAL(b); // 2.50
+
+    // Multiplication (integer and fraction lengths are added together)
+    FixedPoint<7,9> c = a * b;
+
+    PRINT_VAL(c); // 12.500
+
+    // Addition (the integer and fraction lengths are the maximum from each operand)
+    FixedPoint<4,5> d = a + b;
+
+    PRINT_VAL(d); // 7.500
+
+    // Retrieve value as integer
+    int di = d.getValue();
+    int di2 = d.round();
+
+    PRINT_VAL(di); // 7
+    PRINT_VAL(di2); // 8
+
+    // Convert Q3.5 to Q3.1 (any bit length is ok as long as less than 64 total)
+    FixedPoint<3,1> e = a.convert<3,1>();
+
+    PRINT_VAL(e); // 5.0
+
+    // Extend the integer part of the fixed-point number to 12 bits
+    FixedPoint<12,5> f = b.extend<12>();
+
+    PRINT_VAL(f); // 2.50
+
+    // Initialize a fixed-point with from given binary data
+    FixedPoint<2,6> g = FixedPoint<2,6>::createRaw(0xA0);
+
+    PRINT_VAL(g); // -1.5
+
+    // Fixed-point division
+    // Note that dividing Qa.b by Qc.d results in Q(a+d).(b+c)
+    // This is symmetrical to multiplication result: Q(a+c).(b+d)
+    // To see why this makes sense, look in edgeCases().
+    FixedPoint<9,7> h = a / b; // 5.0/2.5 = 2.0
+    FixedPoint<7,9> j = b / a; // 2.5/5.0 = 0.5
+    FixedPoint<4,7> k = a / FixedPoint<3,0>(3); // 5.0/3.0 = 1.6640625
+
+    PRINT_VAL(h); // 2.000
+    PRINT_VAL(j); // 0.500
+    PRINT_VAL(k); // 1.664
+
+
+    // See-also, some edge cases
+    edgeCases();
+
+    // See-also, some more operators that can be used
+    otherOperators();
+}
+```
