@@ -81,12 +81,5 @@ int main()
     PRINT_VAL(h); // 2.000
     PRINT_VAL(j); // 0.500
     PRINT_VAL(k); // 1.664
-
-
-    // See-also, some edge cases
-    edgeCases();
-
-    // See-also, some more operators that can be used
-    otherOperators();
 }
 ```
