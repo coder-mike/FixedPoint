@@ -26,6 +26,16 @@ The library consists of 2 files:
 In addition there is the 3rd file, `examples.cpp` which contains a `main()` that illustrates the use of the library:
 
 ```C++
+#include "fixed_point.hpp"
+
+#include <iostream>
+
+using namespace std;
+
+void edgeCases();
+void otherOperators();
+#define PRINT_VAL(VAL) cout << #VAL << ":\t" << (VAL) << endl
+
 int main()
 {
     // A fixed-point number in Q4.4 signed format (its always signed), with value "5"
@@ -81,5 +91,116 @@ int main()
     PRINT_VAL(h); // 2.000
     PRINT_VAL(j); // 0.500
     PRINT_VAL(k); // 1.664
+
+
+    // See-also, some edge cases
+    edgeCases();
+
+    // See-also, some more operators that can be used
+    otherOperators();
+}
+
+void edgeCases()
+{
+    cout << "--- Edge cases ---" << endl;
+    {
+        FixedPoint<4,8> a = 3;
+        /* This is an interesting conversion, because it makes the result smaller,
+        but it also shifts the bits internally because the fractional part is
+        smaller. If it's converted to 8-bit BEFORE the shift, it it will loose the
+        upper 2 bits. */
+        FixedPoint<4,4> b = a.convert<4,4>();
+
+        PRINT_VAL(b); // 3.000
+    }
+
+    {
+        FixedPoint<4,4> a = 3;
+        /* This is the converse case. In the previous case, the type-conversion
+        needed to occur AFTER the shift, but in this case it needs to occur
+        BEFORE the shift. */
+        FixedPoint<4,8> b = a.convert<4,8>();
+
+        PRINT_VAL(b); // 3.000
+    }
+
+    {
+        // These edge cases shows why it makes sense to have quotient in the
+        // format it is.
+
+        // The first case is dividing a really big number by a really small one
+        FixedPoint<8,0> a = -128;
+        // A really small number:
+        FixedPoint<0,8> b = 1.0/256;
+        FixedPoint<16,0> c = a/b;
+        PRINT_VAL(c); // -32768
+
+        // The converse is dividing a really small number by a really big one
+        FixedPoint<0,16> d = b/a;
+        PRINT_VAL(d); // -0.00003, although the value is actually exactly equal to -2^(-15)
+
+        // You can see the exact value here:
+        FixedPoint<15,1> e = d.leftShift<15>();
+        PRINT_VAL(e); // "-1.0"
+    }
+}
+
+void otherOperators()
+{
+    cout << "--- Other Operators ---" << endl;
+    FixedPoint<5,1> a = 2.5;
+
+    // Addition with an integer
+    FixedPoint<5,1> b = a + 1;
+    PRINT_VAL(b); // 3.50
+
+    // Comparison operators
+    PRINT_VAL(a < b); // true
+    PRINT_VAL(b < a); // false
+    PRINT_VAL(a > b); // true
+    PRINT_VAL(a == a); // true
+    PRINT_VAL(a == b); // false
+    PRINT_VAL(a != a); // false
+    PRINT_VAL(a != b); // true
+    PRINT_VAL(a >= b); // false
+    PRINT_VAL(a >= a); // true
+
+    // Modulus operator (not yet implemented)
+    // Note the output form:
+    // If the input is format Q(a).(b) % Q(c).(d) then the output is Q(c).(max(b,d))
+    FixedPoint<1,3> c = FixedPoint<4,3>(2.625) % FixedPoint<1,2>(0.5);
+    PRINT_VAL(c); // 0.125
+    FixedPoint<1,3> d = FixedPoint<4,1>(0.875) % FixedPoint<1,3>(0.375);
+    PRINT_VAL(d); // 0.125
+
+    // Accumulation
+    FixedPoint<5,2> e = 3.5;
+    e += FixedPoint<3,2>(0.25);
+    PRINT_VAL(e); // 3.75
+
+    // Copy constructor
+    FixedPoint<5,2> f(e);
+    PRINT_VAL(f); // 3.75
+
+    // Assignment operator
+    f = e;
+    PRINT_VAL(f); // 3.75
+}
+
+void compatibility()
+{
+    cout << "--- Compatibility ---" << endl;
+
+    // Assignment with integer value
+    FixedPoint<60,4> a = 123456789123456789ll;
+    PRINT_VAL(a); // 123456789123456789.0
+
+    // Assignment to integer
+    int x = FixedPoint<5,2>(3.75).getValue();
+    PRINT_VAL(x); // 3
+
+    // Assignment to float
+    float f = FixedPoint<5,2>(3.75).getValueF();
+    PRINT_VAL(f); // 3.75
 }
 ```
