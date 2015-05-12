@@ -140,10 +140,10 @@ void otherOperators()
     // Modulus operator
     // Note the output form:
     // If the input is format Q(a).(b) % Q(c).(d) then the output is Q(c).(max(b,d))
-    FixedPoint<1,3> c = FixedPoint<4,3>(2.625) % FixedPoint<1,2>(0.5);
-    PRINT_VAL(c); // 0.125
-    FixedPoint<1,3> d = FixedPoint<4,1>(0.875) % FixedPoint<1,3>(0.375);
-    PRINT_VAL(d); // 0.125
+   // FixedPoint<1,3> c = FixedPoint<4,3>(2.625) % FixedPoint<1,2>(0.5);
+   // PRINT_VAL(c); // 0.125
+   // FixedPoint<1,3> d = FixedPoint<4,1>(0.875) % FixedPoint<1,3>(0.375);
+   //PRINT_VAL(d); // 0.125
 
     // Accumulation
     FixedPoint<5,2> e = 3.5;
@@ -164,7 +164,7 @@ void compatibility()
     cout << "--- Compatibility ---" << endl;
 
     // Assignment with integer value
-    FixedPoint<60,4> a = 123456789123456789ll;
+    FixedPoint<60,4> a = 123456789123456789;
     PRINT_VAL(a); // 123456789123456789.0
 
     // Assignment to integer
