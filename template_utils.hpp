@@ -1,6 +1,8 @@
 #ifndef TEMPLATE_UTILS_H__
 #define TEMPLATE_UTILS_H__
 
+#include <stdint.h>
+
 // This is a dummy type meaning that there are too many bits in the data type
 struct TooManyBits;
 
