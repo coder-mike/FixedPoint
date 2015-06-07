@@ -45,9 +45,12 @@ public:
         RawType value;
     };
 
+    ///Aiding Functions for conflicting int intialization
+    static ThisType fromInt(IntType value) { return ThisType(RawValue(value << FRAC_BITS));}
+    static ThisType fromFloat(float value) { return ThisType(RawType(value * (1 << FRAC_BITS)));}
+
     /// Create a fixed-point with equivalent integer value
     /** For example in 4.12 fixed-point, the number "2" is 0010.000000000000  */
-    FixedPoint(IntType value) : raw_(value << FRAC_BITS) { }
     FixedPoint(int value) : raw_(value << FRAC_BITS) { }
 
     FixedPoint(double value) : raw_((RawType)(value * (1 << FRAC_BITS))) { }

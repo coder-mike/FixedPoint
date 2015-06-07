@@ -64,7 +64,6 @@ int main()
     PRINT_VAL(j); // 0.500
     PRINT_VAL(k); // 1.664
 
-
     // See-also, some edge cases
     edgeCases();
 
@@ -164,8 +163,12 @@ void compatibility()
     cout << "--- Compatibility ---" << endl;
 
     // Assignment with integer value
-    FixedPoint<60,4> a = 123456789123456789;
-    PRINT_VAL(a); // 123456789123456789.0
+    // FixedPoint<60,4> a = 123456789123456789;
+    // PRINT_VAL(a); // 123456789123456789.0
+
+    // Asssignment to flexible bit combinations
+    FixedPoint<31,31> b = 2147483646.99999999;
+    PRINT_VAL(b);
 
     // Assignment to integer
     int x = FixedPoint<5,2>(3.75).getValue();
