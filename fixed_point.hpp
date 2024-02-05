@@ -36,7 +36,6 @@ public:
     typedef typename GET_INT_WITH_LENGTH<INT_BITS + 1>::RESULT RoundType;
 
 
-
     typedef FixedPoint<INT_BITS, FRAC_BITS> ThisType;
 
     struct RawValue
@@ -98,6 +97,9 @@ public:
                 >:: exec(raw_));
     }
 
+    // This multiplication method also converts the result to a new format
+    // This is mathematically correct, but I don't want it to happen for Eigen compatibility
+    /*
     /// Multiplication with another fixed-point
     template <int INT_BITS2, int FRAC_BITS2>
     FixedPoint<INT_BITS + INT_BITS2, FRAC_BITS + FRAC_BITS2>
@@ -105,6 +107,50 @@ public:
     {
         return FixedPoint<INT_BITS + INT_BITS2, FRAC_BITS + FRAC_BITS2>::createRaw(raw_ * value.getRaw());
     }
+    */
+   FixedPoint<INT_BITS, FRAC_BITS>
+   operator *(FixedPoint<INT_BITS, FRAC_BITS> value) const
+    {
+        auto temp = FixedPoint<INT_BITS*2, FRAC_BITS*2>::createRaw(raw_ * value.getRaw());
+        // Now we need to shift the radix point back to the original position
+        return temp.template convert<INT_BITS, FRAC_BITS>();
+    }
+    // Multiplication with an integer
+    // The intermediate type is set to some arbitrary value, there may be a better way to do this
+    FixedPoint<INT_BITS, FRAC_BITS> operator *(int value) const
+    {
+        auto temp = FixedPoint<INT_BITS*2, FRAC_BITS*2>::createRaw(raw_ * value);
+        // Now we need to shift the radix point back to the original position
+        return temp.template convert<INT_BITS, FRAC_BITS>();
+    }
+
+    // Multiplication with a double
+    FixedPoint<INT_BITS, FRAC_BITS> operator *(double value) const
+    {
+        auto temp = FixedPoint<INT_BITS*2, FRAC_BITS*2>::createRaw(raw_ * value);
+        // Now we need to shift the radix point back to the original position
+        return temp.template convert<INT_BITS, FRAC_BITS>();
+    }
+
+    // *= overload
+    FixedPoint<INT_BITS, FRAC_BITS>& operator*=(FixedPoint<INT_BITS, FRAC_BITS> value)
+    {
+        raw_ *= value.template convert<INT_BITS, FRAC_BITS>().getRaw();
+        return *this;
+    }
+
+    FixedPoint<INT_BITS, FRAC_BITS>& operator*=(int value)
+    {
+        raw_ *= FixedPoint<INT_BITS, FRAC_BITS>(value).getRaw();
+        return *this;
+    }
+
+    FixedPoint<INT_BITS, FRAC_BITS>& operator*=(double value)
+    {
+        raw_ *= FixedPoint<INT_BITS, FRAC_BITS>(value).getRaw();
+        return *this;
+    }
+
 
     /// Addition with an integer
     FixedPoint<INT_BITS, FRAC_BITS> operator +(IntType value) const
@@ -113,29 +159,30 @@ public:
     }
 
     /// Addition with another fixed point
-    template <int INT_BITS2, int FRAC_BITS2>
-    FixedPoint<GET_MAX<INT_BITS, INT_BITS2>::RESULT, GET_MAX<FRAC_BITS, FRAC_BITS2>::RESULT>
-        operator+(FixedPoint<INT_BITS2, FRAC_BITS2> value) const
+    FixedPoint<INT_BITS, FRAC_BITS>
+        operator+(FixedPoint<INT_BITS, FRAC_BITS> value) const
     {
-        // How many bits are in the result?
-        static const int INT_BITS_RES = GET_MAX<INT_BITS, INT_BITS2>::RESULT;
-        static const int FRAC_BITS_RES = GET_MAX<FRAC_BITS, FRAC_BITS2>::RESULT;
-
         // This is the type of the result
-        typedef FixedPoint<INT_BITS_RES, FRAC_BITS_RES> ResultType;
+        typedef FixedPoint<INT_BITS, FRAC_BITS> ResultType;
 
         // Convert both operands to result type
-        ResultType op1(this->convert<INT_BITS_RES, FRAC_BITS_RES>());
-        ResultType op2(value.convert<INT_BITS_RES, FRAC_BITS_RES>());
+        ResultType op1(this->convert<INT_BITS, FRAC_BITS>());
+        ResultType op2(value.template convert<INT_BITS, FRAC_BITS>());
 
         // Then the addition is trivial
         return ResultType::createRaw(op1.getRaw() + op2.getRaw());
     }
 
-    template <int INT_BITS2, int FRAC_BITS2>
-    ThisType& operator+=(FixedPoint<INT_BITS2, FRAC_BITS2> value)
+    // Addition with an integer
+    // This is again not totally correct...
+    FixedPoint<INT_BITS, FRAC_BITS> operator +(float value) const
     {
-        raw_ += value.convert<INT_BITS, FRAC_BITS>().getRaw();
+        return *this + FixedPoint<INT_BITS, FRAC_BITS>(value);
+    }
+
+    ThisType& operator+=(FixedPoint<INT_BITS, FRAC_BITS> value)
+    {
+        raw_ += value.template convert<INT_BITS, FRAC_BITS>().getRaw();
         return *this;
     }
 
@@ -151,159 +198,188 @@ public:
         return *this;
     }
 
-    template <int INT_BITS2, int FRAC_BITS2>
-    ThisType& operator-=(FixedPoint<INT_BITS2, FRAC_BITS2> value)
+    ThisType& operator-=(FixedPoint<INT_BITS, FRAC_BITS> value)
     {
-        raw_ -= value.convert<INT_BITS, FRAC_BITS>().getRaw();
+        raw_ -= value.template convert<INT_BITS, FRAC_BITS>().getRaw();
         return *this;
     }
 
     /// Subtraction operator
-    template <int INT_BITS2, int FRAC_BITS2>
-    FixedPoint<GET_MAX<INT_BITS, INT_BITS2>::RESULT, GET_MAX<FRAC_BITS, FRAC_BITS2>::RESULT>
-        operator-(FixedPoint<INT_BITS2, FRAC_BITS2> value) const
+    FixedPoint<INT_BITS, FRAC_BITS>
+        operator-(FixedPoint<INT_BITS, FRAC_BITS> value) const
     {
-        // How many bits are in the result?
-        static const int INT_BITS_RES = GET_MAX<INT_BITS, INT_BITS2>::RESULT;
-        static const int FRAC_BITS_RES = GET_MAX<FRAC_BITS, FRAC_BITS2>::RESULT;
-
         // This is the type of the result
-        typedef FixedPoint<INT_BITS_RES, FRAC_BITS_RES> ResultType;
+        typedef FixedPoint<INT_BITS, FRAC_BITS> ResultType;
 
         // Convert both operands to result type
-        ResultType op1(this->convert<INT_BITS_RES, FRAC_BITS_RES>());
-        ResultType op2(value.convert<INT_BITS_RES, FRAC_BITS_RES>());
+        ResultType op1(this->convert<INT_BITS, FRAC_BITS>());
+        ResultType op2(value.template convert<INT_BITS, FRAC_BITS>());
 
         // Then the addition is trivial
         return ResultType::createRaw(op1.getRaw() - op2.getRaw());
     }
 
-    template <int INT_BITS2, int FRAC_BITS2>
-    bool operator < (FixedPoint<INT_BITS2, FRAC_BITS2> other) const
+    /// Subtraction operator
+    FixedPoint<INT_BITS, FRAC_BITS>
+        operator-(double value) const
     {
-        // How many bits are in the result?
-        static const int INT_BITS_RES = GET_MAX<INT_BITS, INT_BITS2>::RESULT;
-        static const int FRAC_BITS_RES = GET_MAX<FRAC_BITS, FRAC_BITS2>::RESULT;
+        return *this - FixedPoint<INT_BITS, FRAC_BITS>(value);
+    }
 
+    // Unary minus
+    FixedPoint<INT_BITS, FRAC_BITS> operator-() const
+    {
+        return FixedPoint<INT_BITS, FRAC_BITS>::createRaw(-raw_);
+    }
+
+
+    bool operator < (FixedPoint<INT_BITS, FRAC_BITS> other) const
+    {
         // This is the type of the result
-        typedef FixedPoint<INT_BITS_RES, FRAC_BITS_RES> ResultType;
+        typedef FixedPoint<INT_BITS, FRAC_BITS> ResultType;
 
         // Convert both operands to result type
-        ResultType op1(this->convert<INT_BITS_RES, FRAC_BITS_RES>());
-        ResultType op2(other.convert<INT_BITS_RES, FRAC_BITS_RES>());
+        ResultType op1(this->convert<INT_BITS, FRAC_BITS>());
+        ResultType op2(other.template convert<INT_BITS, FRAC_BITS>());
 
         // Then the operation is trivial
         return op1.getRaw() < op2.getRaw();
     }
 
-    template <int INT_BITS2, int FRAC_BITS2>
-    bool operator > (FixedPoint<INT_BITS2, FRAC_BITS2> other) const
+    bool operator > (FixedPoint<INT_BITS, FRAC_BITS> other) const
     {
-        // How many bits are in the result?
-        static const int INT_BITS_RES = GET_MAX<INT_BITS, INT_BITS2>::RESULT;
-        static const int FRAC_BITS_RES = GET_MAX<FRAC_BITS, FRAC_BITS2>::RESULT;
-
         // This is the type of the result
-        typedef FixedPoint<INT_BITS_RES, FRAC_BITS_RES> ResultType;
+        typedef FixedPoint<INT_BITS, FRAC_BITS> ResultType;
 
         // Convert both operands to result type
-        ResultType op1(this->convert<INT_BITS_RES, FRAC_BITS_RES>());
-        ResultType op2(other.convert<INT_BITS_RES, FRAC_BITS_RES>());
+        ResultType op1(this->convert<INT_BITS, FRAC_BITS>());
+        ResultType op2(other.template convert<INT_BITS, FRAC_BITS>());
 
         // Then the operation is trivial
         return op1.getRaw() > op2.getRaw();
     }
 
-    template <int INT_BITS2, int FRAC_BITS2>
-    bool operator >= (FixedPoint<INT_BITS2, FRAC_BITS2> other) const
+    bool operator >= (FixedPoint<INT_BITS, FRAC_BITS> other) const
     {
-        // How many bits are in the result?
-        static const int INT_BITS_RES = GET_MAX<INT_BITS, INT_BITS2>::RESULT;
-        static const int FRAC_BITS_RES = GET_MAX<FRAC_BITS, FRAC_BITS2>::RESULT;
-
         // This is the type of the result
-        typedef FixedPoint<INT_BITS_RES, FRAC_BITS_RES> ResultType;
+        typedef FixedPoint<INT_BITS, FRAC_BITS> ResultType;
 
         // Convert both operands to result type
-        ResultType op1(this->convert<INT_BITS_RES, FRAC_BITS_RES>());
-        ResultType op2(other.convert<INT_BITS_RES, FRAC_BITS_RES>());
+        ResultType op1(this->convert<INT_BITS, FRAC_BITS>());
+        ResultType op2(other.template convert<INT_BITS, FRAC_BITS>());
 
         // Then the operation is trivial
         return op1.getRaw() >= op2.getRaw();
     }
 
-    template <int INT_BITS2, int FRAC_BITS2>
-    bool operator <= (FixedPoint<INT_BITS2, FRAC_BITS2> other) const
+    bool operator <= (FixedPoint<INT_BITS, FRAC_BITS> other) const
     {
-        // How many bits are in the result?
-        static const int INT_BITS_RES = GET_MAX<INT_BITS, INT_BITS2>::RESULT;
-        static const int FRAC_BITS_RES = GET_MAX<FRAC_BITS, FRAC_BITS2>::RESULT;
-
         // This is the type of the result
-        typedef FixedPoint<INT_BITS_RES, FRAC_BITS_RES> ResultType;
+        typedef FixedPoint<INT_BITS, FRAC_BITS> ResultType;
 
         // Convert both operands to result type
-        ResultType op1(this->convert<INT_BITS_RES, FRAC_BITS_RES>());
-        ResultType op2(other.convert<INT_BITS_RES, FRAC_BITS_RES>());
+        ResultType op1(this->convert<INT_BITS, FRAC_BITS>());
+        ResultType op2(other.template convert<INT_BITS, FRAC_BITS>());
 
         // Then the operation is trivial
         return op1.getRaw() <= op2.getRaw();
     }
 
-    template <int INT_BITS2, int FRAC_BITS2>
-    bool operator ==(FixedPoint<INT_BITS2, FRAC_BITS2> other) const
+    bool operator ==(FixedPoint<INT_BITS, FRAC_BITS> other) const
     {
-        // How many bits are in the result?
-        static const int INT_BITS_RES = GET_MAX<INT_BITS, INT_BITS2>::RESULT;
-        static const int FRAC_BITS_RES = GET_MAX<FRAC_BITS, FRAC_BITS2>::RESULT;
-
         // This is the type of the result
-        typedef FixedPoint<INT_BITS_RES, FRAC_BITS_RES> ResultType;
+        typedef FixedPoint<INT_BITS, FRAC_BITS> ResultType;
 
         // Convert both operands to result type
-        ResultType op1(this->convert<INT_BITS_RES, FRAC_BITS_RES>());
-        ResultType op2(other.convert<INT_BITS_RES, FRAC_BITS_RES>());
+        ResultType op1(this->convert<INT_BITS, FRAC_BITS>());
+        ResultType op2(other.template convert<INT_BITS, FRAC_BITS>());
 
         // Then the operation is trivial
         return op1.getRaw() == op2.getRaw();
     }
 
-    template <int INT_BITS2, int FRAC_BITS2>
-    bool operator != (FixedPoint<INT_BITS2, FRAC_BITS2> other) const
+    bool operator != (FixedPoint<INT_BITS, FRAC_BITS> other) const
     {
-        // How many bits are in the result?
-        static const int INT_BITS_RES = GET_MAX<INT_BITS, INT_BITS2>::RESULT;
-        static const int FRAC_BITS_RES = GET_MAX<FRAC_BITS, FRAC_BITS2>::RESULT;
-
         // This is the type of the result
-        typedef FixedPoint<INT_BITS_RES, FRAC_BITS_RES> ResultType;
+        typedef FixedPoint<INT_BITS, FRAC_BITS> ResultType;
 
         // Convert both operands to result type
-        ResultType op1(this->convert<INT_BITS_RES, FRAC_BITS_RES>());
-        ResultType op2(other.convert<INT_BITS_RES, FRAC_BITS_RES>());
+        ResultType op1(this->convert<INT_BITS, FRAC_BITS>());
+        ResultType op2(other.template convert<INT_BITS, FRAC_BITS>());
 
         // Then the operation is trivial
         return op1.getRaw() != op2.getRaw();
     }
 
     /// Divide operator
-    template <int INT_BITS2, int FRAC_BITS2>
-    FixedPoint<INT_BITS + FRAC_BITS2, FRAC_BITS + INT_BITS2>
-        operator/(FixedPoint<INT_BITS2, FRAC_BITS2> divisor) const
+    FixedPoint<INT_BITS, FRAC_BITS>
+        operator/(FixedPoint<INT_BITS, FRAC_BITS> divisor) const
     {
         // (A/2^B)/(C/2^D) = (A/C)/2^(B-D);
+        // fpm library says the normal fixed-point division is:
+        // x * 2**Frac_bits / y
 
-        typedef FixedPoint<INT_BITS + FRAC_BITS2, FRAC_BITS + INT_BITS2> ResultType;
-        typedef typename GET_INT_WITH_LENGTH<INT_BITS + FRAC_BITS + FRAC_BITS2 + INT_BITS2>::RESULT IntermediateType;
+        typedef FixedPoint<INT_BITS, FRAC_BITS> ResultType;
+        typedef typename GET_INT_WITH_LENGTH<INT_BITS*2 + FRAC_BITS*2>::RESULT IntermediateType;
+
+        IntermediateType int_frac(1 << FRAC_BITS);
 
         // Expand the dividend so we don't lose resolution
-        IntermediateType intermediate(raw_);
+        IntermediateType intermediate(raw_ * int_frac);
         // Shift the dividend. FRAC_BITS2 cancels with the fractional bits in
         // divisor, and INT_BITS2 adds the required resolution.
-        intermediate <<= FRAC_BITS2 + INT_BITS2;
+        //intermediate <<= FRAC_BITS + INT_BITS;
         intermediate /= divisor.getRaw();
 
         return ResultType::createRaw(intermediate);
+    }
+
+    bool isfinite() const
+    {
+        return true;
+    }
+
+    // Divide with double
+    FixedPoint<INT_BITS, FRAC_BITS>
+        operator/(double divisor) const
+    {
+        typedef typename GET_INT_WITH_LENGTH<INT_BITS*2 + FRAC_BITS*2>::RESULT IntermediateType;
+
+        IntermediateType int_frac(1 << FRAC_BITS);
+
+        // Expand the dividend so we don't lose resolution
+        IntermediateType intermediate(raw_ * int_frac);
+        // Shift the dividend. FRAC_BITS2 cancels with the fractional bits in
+        // divisor, and INT_BITS2 adds the required resolution.
+        //intermediate <<= FRAC_BITS + INT_BITS;
+        intermediate /= divisor;
+
+        return FixedPoint<INT_BITS, FRAC_BITS>::createRaw(intermediate);
+    }
+
+    // /= overload
+    FixedPoint<INT_BITS, FRAC_BITS>& operator/=(FixedPoint<INT_BITS, FRAC_BITS> divisor)
+    {
+        typedef typename GET_INT_WITH_LENGTH<INT_BITS*2 + FRAC_BITS*2>::RESULT IntermediateType;
+
+        IntermediateType int_frac(1 << FRAC_BITS);
+
+        // Expand the dividend so we don't lose resolution
+        IntermediateType intermediate(raw_ * int_frac);
+        // Shift the dividend. FRAC_BITS2 cancels with the fractional bits in
+        // divisor, and INT_BITS2 adds the required resolution.
+        //intermediate <<= FRAC_BITS + INT_BITS;
+        intermediate /= divisor.getRaw();
+
+        raw_ = intermediate;
+
+        return *this;
+    }
+
+    // an overload to be used when this type is converted to a double
+    operator double() const
+    {
+        return getValueF();
     }
 
     FixedPoint<INT_BITS, FRAC_BITS>& operator=(const FixedPoint<INT_BITS, FRAC_BITS> value)
