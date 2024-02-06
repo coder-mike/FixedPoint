@@ -44,10 +44,6 @@ public:
         RawType value;
     };
 
-    ///Aiding Functions for conflicting int intialization
-    static ThisType fromInt(IntType value) { return ThisType(RawValue(value << FRAC_BITS));}
-    static ThisType fromFloat(float value) { return ThisType(RawType(value * (1 << FRAC_BITS)));}
-
     /// Create a fixed-point with equivalent integer value
     /** For example in 4.12 fixed-point, the number "2" is 0010.000000000000  */
     FixedPoint(int value){
@@ -57,15 +53,32 @@ public:
         applyMask();
     }
 
+    // Terrible negative number handling, will fix it
     FixedPoint(double value){
         raw_ = value * (1 << FRAC_BITS);
+        bool is_neg = raw_ < 0;
+        if (is_neg){
+            raw_ = -raw_;
+        }
         mask = (1 << (FRAC_BITS+INT_BITS)) - 1;
         applyMask();
+        if (is_neg){
+            raw_ = -raw_;
+        }
     }
+
+    // Terrible negative number handling, will fix it
     FixedPoint(float value){
         raw_ = value * (1 << FRAC_BITS);
         mask = (1 << (FRAC_BITS+INT_BITS)) - 1;
+        bool is_neg = raw_ < 0;
+        if (is_neg){
+            raw_ = -raw_;
+        }
         applyMask();
+        if (is_neg){
+            raw_ = -raw_;
+        }
     }
 
     /// Default constructor
