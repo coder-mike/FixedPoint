@@ -91,7 +91,7 @@ public:
     /// Default constructor
     FixedPoint(){
         raw_ = 0;
-        mask = (1 << (FRAC_BITS+INT_BITS)) - 1;
+        mask = (1LL << (FRAC_BITS+INT_BITS)) - 1;
         applyMask();
     }
 
