@@ -48,8 +48,15 @@ public:
     /** For example in 4.12 fixed-point, the number "2" is 0010.000000000000  */
     FixedPoint(int value){
         raw_ = value << FRAC_BITS;
+        bool is_neg = raw_ < 0;
+        if (is_neg){
+            raw_ = -raw_;
+        }
         // mask is 1 for FRAC_BITS+INT_BITS, 0 for the rest
         mask = (1 << (FRAC_BITS+INT_BITS)) - 1;
+        if(is_neg){
+            raw_ = -raw_;
+        }
         applyMask();
     }
 
