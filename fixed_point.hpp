@@ -48,17 +48,16 @@ public:
     /// Create a fixed-point with equivalent integer value
     /** For example in 4.12 fixed-point, the number "2" is 0010.000000000000  */
     FixedPoint(int value){
+        bool is_neg = value < 0;
+        if (is_neg){
+            value = -value;
+        }
         raw_ = value << FRAC_BITS;
-        bool is_neg = raw_ < 0;
+        mask = (1 << (FRAC_BITS+INT_BITS)) - 1;
+        applyMask();
         if (is_neg){
             raw_ = -raw_;
         }
-        // mask is 1 for FRAC_BITS+INT_BITS, 0 for the rest
-        mask = (1 << (FRAC_BITS+INT_BITS)) - 1;
-        if(is_neg){
-            raw_ = -raw_;
-        }
-        applyMask();
     }
 
     // Terrible negative number handling, will fix it
