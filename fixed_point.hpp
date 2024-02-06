@@ -3,6 +3,7 @@
 
 #include <ostream>
 #include <iomanip>
+#include <iostream>
 
 #include "template_utils.hpp"
 
@@ -62,11 +63,12 @@ public:
 
     // Terrible negative number handling, will fix it
     FixedPoint(double value){
-        raw_ = value * (1 << FRAC_BITS);
-        bool is_neg = raw_ < 0;
+        std::cout << "value is " << value << std::endl;
+        bool is_neg = value < 0;
         if (is_neg){
-            raw_ = -raw_;
+            value = -value;
         }
+        raw_ = value * (1 << FRAC_BITS);
         mask = (1 << (FRAC_BITS+INT_BITS)) - 1;
         applyMask();
         if (is_neg){
@@ -76,12 +78,12 @@ public:
 
     // Terrible negative number handling, will fix it
     FixedPoint(float value){
+        bool is_neg = value < 0;
+        if (is_neg){
+            value = -value;
+        }
         raw_ = value * (1 << FRAC_BITS);
         mask = (1 << (FRAC_BITS+INT_BITS)) - 1;
-        bool is_neg = raw_ < 0;
-        if (is_neg){
-            raw_ = -raw_;
-        }
         applyMask();
         if (is_neg){
             raw_ = -raw_;
