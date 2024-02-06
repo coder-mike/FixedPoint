@@ -50,15 +50,36 @@ public:
 
     /// Create a fixed-point with equivalent integer value
     /** For example in 4.12 fixed-point, the number "2" is 0010.000000000000  */
-    FixedPoint(int value) : raw_(value << FRAC_BITS) { }
+    FixedPoint(int value){
+        raw_ = value << FRAC_BITS;
+        // mask is 1 for FRAC_BITS+INT_BITS, 0 for the rest
+        mask = (1 << (FRAC_BITS+INT_BITS)) - 1;
+        applyMask();
+    }
 
-    FixedPoint(double value) : raw_((RawType)(value * (1 << FRAC_BITS))) { }
-    FixedPoint(float value) : raw_((RawType)(value * (1 << FRAC_BITS))) { }
+    FixedPoint(double value){
+        raw_ = value * (1 << FRAC_BITS);
+        mask = (1 << (FRAC_BITS+INT_BITS)) - 1;
+        applyMask();
+    }
+    FixedPoint(float value){
+        raw_ = value * (1 << FRAC_BITS);
+        mask = (1 << (FRAC_BITS+INT_BITS)) - 1;
+        applyMask();
+    }
 
     /// Default constructor
-    FixedPoint() : raw_(0) { }
+    FixedPoint(){
+        raw_ = 0;
+        mask = (1 << (FRAC_BITS+INT_BITS)) - 1;
+        applyMask();
+    }
 
     FixedPoint(RawValue value): raw_(value.value) { }
+
+    void applyMask(){
+        raw_ &= mask;
+    }
 
     /// Create a fixed-point with a predefined raw_ value, with no manipulation
     static FixedPoint<INT_BITS, FRAC_BITS> createRaw(RawType aData) { return FixedPoint<INT_BITS, FRAC_BITS>(RawValue(aData)); }
@@ -448,6 +469,7 @@ public:
 private:
 
     RawType raw_;
+    __int128_t mask;
 };
 
 // Make the fixed-point struct  ostream outputtable
