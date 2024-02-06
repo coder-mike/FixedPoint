@@ -339,6 +339,11 @@ public:
         return op1.getRaw() == op2.getRaw();
     }
 
+    bool operator ==(double other) const
+    {
+        return getValueF() == other;
+    }
+
     bool operator != (FixedPoint<INT_BITS, FRAC_BITS> other) const
     {
         // This is the type of the result
