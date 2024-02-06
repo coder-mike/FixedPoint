@@ -62,7 +62,6 @@ public:
 
     // Terrible negative number handling, will fix it
     FixedPoint(double value){
-        std::cout << "value is " << value << std::endl;
         bool is_neg = value < 0;
         if (is_neg){
             value = -value;
