@@ -56,9 +56,10 @@ def subtraction_test(n, m):
         # convert to fixed point
         fixed_num1 = FixedPoint(num1, True, m, n, overflow='wrap', rounding='down', overflow_alert='ignore')
         fixed_num2 = FixedPoint(num2, True, m, n, overflow='wrap', rounding='down', overflow_alert='ignore')
+        sub = float(FixedPoint(float(fixed_num1 - fixed_num2), True, m, n, overflow='wrap', rounding='down', overflow_alert='ignore'))
         # write to file
         with open(output_file, 'a') as f:
-            f.write(f"- {num1} {num2} {fixed_num1 - fixed_num2}\n")
+            f.write(f"- {num1} {num2} {sub}\n")
 
 def multiplication_test(n, m):
     # use tqdm for loop
@@ -69,9 +70,10 @@ def multiplication_test(n, m):
         # convert to fixed point
         fixed_num1 = FixedPoint(num1, True, m, n, overflow='wrap', rounding='down', overflow_alert='ignore')
         fixed_num2 = FixedPoint(num2, True, m, n, overflow='wrap', rounding='down', overflow_alert='ignore')
+        mult = float(FixedPoint(float(fixed_num1 * fixed_num2), True, m, n, overflow='wrap', rounding='down', overflow_alert='ignore'))
         # write to file
         with open(output_file, 'a') as f:
-            f.write(f"* {num1} {num2} {fixed_num1 * fixed_num2}\n")
+            f.write(f"* {num1} {num2} {mult}\n")
 
 def division_test(n, m):
     # use tqdm for loop
