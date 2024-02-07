@@ -40,11 +40,12 @@ def addition_test(n, m):
         num1 = (random() * (MAX_BOUND - MIN_BOUND)) + MIN_BOUND
         num2 = (random() * (MAX_BOUND - MIN_BOUND)) + MIN_BOUND
         # convert to fixed point
-        fixed_num1 = float(FixedPoint(num1, True, m, n, overflow='wrap', rounding='down', overflow_alert='ignore'))
-        fixed_num2 = float(FixedPoint(num2, True, m, n, overflow='wrap', rounding='down', overflow_alert='ignore'))
+        fixed_num1 = FixedPoint(num1, True, m, n, overflow='wrap', rounding='down', overflow_alert='ignore')
+        fixed_num2 = FixedPoint(num2, True, m, n, overflow='wrap', rounding='down', overflow_alert='ignore')
+        summ = float(FixedPoint(float(fixed_num1 + fixed_num2), True, m, n, overflow='wrap', rounding='down', overflow_alert='ignore'))
         # write to file
         with open(output_file, 'a') as f:
-            f.write(f"+ {num1} {num2} {fixed_num1 + fixed_num2}\n")
+            f.write(f"+ {num1} {num2} {summ}\n")
 
 def subtraction_test(n, m):
     # use tqdm for loop
@@ -53,8 +54,8 @@ def subtraction_test(n, m):
         num1 = (random() * (MAX_BOUND - MIN_BOUND)) + MIN_BOUND
         num2 = (random() * (MAX_BOUND - MIN_BOUND)) + MIN_BOUND
         # convert to fixed point
-        fixed_num1 = float(FixedPoint(num1, True, m, n, overflow='wrap', rounding='down', overflow_alert='ignore'))
-        fixed_num2 = float(FixedPoint(num2, True, m, n, overflow='wrap', rounding='down', overflow_alert='ignore'))
+        fixed_num1 = FixedPoint(num1, True, m, n, overflow='wrap', rounding='down', overflow_alert='ignore')
+        fixed_num2 = FixedPoint(num2, True, m, n, overflow='wrap', rounding='down', overflow_alert='ignore')
         # write to file
         with open(output_file, 'a') as f:
             f.write(f"- {num1} {num2} {fixed_num1 - fixed_num2}\n")
@@ -66,8 +67,8 @@ def multiplication_test(n, m):
         num1 = (random() * (MAX_BOUND - MIN_BOUND)) + MIN_BOUND
         num2 = (random() * (MAX_BOUND - MIN_BOUND)) + MIN_BOUND
         # convert to fixed point
-        fixed_num1 = float(FixedPoint(num1, True, m, n, overflow='wrap', rounding='down', overflow_alert='ignore'))
-        fixed_num2 = float(FixedPoint(num2, True, m, n, overflow='wrap', rounding='down', overflow_alert='ignore'))
+        fixed_num1 = FixedPoint(num1, True, m, n, overflow='wrap', rounding='down', overflow_alert='ignore')
+        fixed_num2 = FixedPoint(num2, True, m, n, overflow='wrap', rounding='down', overflow_alert='ignore')
         # write to file
         with open(output_file, 'a') as f:
             f.write(f"* {num1} {num2} {fixed_num1 * fixed_num2}\n")
@@ -79,8 +80,8 @@ def division_test(n, m):
         num1 = (random() * (MAX_BOUND - MIN_BOUND)) + MIN_BOUND
         num2 = (random() * (MAX_BOUND - MIN_BOUND)) + MIN_BOUND
         # convert to fixed point
-        fixed_num1 = float(FixedPoint(num1, True, m, n, overflow='wrap', rounding='down', overflow_alert='ignore'))
-        fixed_num2 = float(FixedPoint(num2, True, m, n, overflow='wrap', rounding='down', overflow_alert='ignore'))
+        fixed_num1 = FixedPoint(num1, True, m, n, overflow='wrap', rounding='down', overflow_alert='ignore')
+        fixed_num2 = FixedPoint(num2, True, m, n, overflow='wrap', rounding='down', overflow_alert='ignore')
         if(fixed_num2 == 0):
             continue
         # write to file
@@ -105,8 +106,8 @@ def equality_test(n, m):
         num1 = (random() * (MAX_BOUND - MIN_BOUND)) + MIN_BOUND
         num2 = (random() * (MAX_BOUND - MIN_BOUND)) + MIN_BOUND
         # convert to fixed point
-        fixed_num1 = float(FixedPoint(num1, True, m, n, overflow='wrap', rounding='down', overflow_alert='ignore'))
-        fixed_num2 = float(FixedPoint(num2, True, m, n, overflow='wrap', rounding='down', overflow_alert='ignore'))
+        fixed_num1 = FixedPoint(num1, True, m, n, overflow='wrap', rounding='down', overflow_alert='ignore')
+        fixed_num2 = FixedPoint(num2, True, m, n, overflow='wrap', rounding='down', overflow_alert='ignore')
         # write to file
         with open(output_file, 'a') as f:
             f.write(f"== {num1} {num2} {fixed_num1 == fixed_num2}\n")
@@ -118,8 +119,8 @@ def less_than_test(n, m):
         num1 = (random() * (MAX_BOUND - MIN_BOUND)) + MIN_BOUND
         num2 = (random() * (MAX_BOUND - MIN_BOUND)) + MIN_BOUND
         # convert to fixed point
-        fixed_num1 = float(FixedPoint(num1, True, m, n, overflow='wrap', rounding='down', overflow_alert='ignore'))
-        fixed_num2 = float(FixedPoint(num2, True, m, n, overflow='wrap', rounding='down', overflow_alert='ignore'))
+        fixed_num1 = FixedPoint(num1, True, m, n, overflow='wrap', rounding='down', overflow_alert='ignore')
+        fixed_num2 = FixedPoint(num2, True, m, n, overflow='wrap', rounding='down', overflow_alert='ignore')
         # write to file
         with open(output_file, 'a') as f:
             f.write(f"< {num1} {num2} {fixed_num1 < fixed_num2}\n")
@@ -131,8 +132,8 @@ def greater_than_test(n, m):
         num1 = (random() * (MAX_BOUND - MIN_BOUND)) + MIN_BOUND
         num2 = (random() * (MAX_BOUND - MIN_BOUND)) + MIN_BOUND
         # convert to fixed point
-        fixed_num1 = float(FixedPoint(num1, True, m, n, overflow='wrap', rounding='down', overflow_alert='ignore'))
-        fixed_num2 = float(FixedPoint(num2, True, m, n, overflow='wrap', rounding='down', overflow_alert='ignore'))
+        fixed_num1 = FixedPoint(num1, True, m, n, overflow='wrap', rounding='down', overflow_alert='ignore')
+        fixed_num2 = FixedPoint(num2, True, m, n, overflow='wrap', rounding='down', overflow_alert='ignore')
         # write to file
         with open(output_file, 'a') as f:
             f.write(f"> {num1} {num2} {fixed_num1 > fixed_num2}\n")
@@ -161,9 +162,11 @@ for N in tqdm(range(8, 9)):
 
 
 """
+# FAIL -130.622 + -211.598 == 125.379 + 44.406 == -86.215 != 169.785
 # example
-custom_fixed = FixedPoint(34, True, m=8, n=8, overflow='wrap', rounding='down', overflow_alert='ignore')
+custom_fixed = FixedPoint(-130.622, True, m=8, n=8, overflow='wrap', rounding='down', overflow_alert='ignore')
 print(float(custom_fixed))
-num2 = FixedPoint(5, True, m=8, n=8)
+num2 = FixedPoint(-211.598, True, m=8, n=8, overflow='wrap', rounding='down', overflow_alert='ignore')
 print(float(num2))
+print(float(FixedPoint(float(custom_fixed + num2), True, m=8, n=8, overflow='wrap', rounding='down', overflow_alert='ignore')))
 """
