@@ -175,7 +175,6 @@ int main(const int argc, const char* argv[]){
     printSuccess(simpleSub(a,b), (double)in1-in2);
 
 
-
     // simple multiplication test   
     std::cout<< "\nTESTING MULTIPLICATION\n";
     edgeCases(&in1, &in2, MUL); 
@@ -185,8 +184,6 @@ int main(const int argc, const char* argv[]){
     printSuccess(simpleMul(a,b), (double)in1*in2);
 
 
-
-
     // simple division test
     std::cout<< "\nTESTING DIVISION\n";
     edgeCases(&in1, &in2, DIV);    
@@ -194,7 +191,6 @@ int main(const int argc, const char* argv[]){
     b = FixedPoint<decimal, fractional>(in2); 
     overflowDetection(&in1, &in2, DIV);
     printSuccess(simpleDiv(a,b), (double)in1/in2);
-
 
 
     // simple modulo test
