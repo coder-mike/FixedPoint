@@ -10,8 +10,8 @@
 #define UNCERTAINTY 0.15
 
 // global variables to set bit width
-short int const decimal = 4, fractional=6;
-
+const unsigned int ARRAY[10] = {0,1,2,3,4,5,6,7,8,9};
+short unsigned const decimal = ARRAY[5], fractional=6;
 
 FixedPoint<decimal, fractional> simpleAdd (FixedPoint<decimal, fractional> in1, FixedPoint<decimal, fractional> in2){
     
@@ -37,11 +37,12 @@ FixedPoint<decimal, fractional> simpleDiv (FixedPoint<decimal, fractional> in1, 
     return output;
 }
 
-FixedPoint<decimal, fractional> simpleMod (FixedPoint<decimal, fractional> in1, FixedPoint<decimal, fractional> in2){
+FixedPoint<decimal, fractional> simpleMod (FixedPoint<decimal, fractional> in1, int in2){
     
     FixedPoint<decimal, fractional> output = (int)in1 % (int)in2; 
     return output;
 }
+
 
 
 void printSuccess(FixedPoint<decimal, fractional> fxPoint, double dbl){
@@ -69,6 +70,8 @@ void printSuccess(FixedPoint<decimal, fractional> fxPoint, double dbl){
         std::cout << "\033[1;32mSUCCESS\033[0m\n";
     }
 }
+
+// void edgeCases()
 
 
 int main(){
@@ -124,7 +127,7 @@ int main(){
 
     std::cout<< "\nTESTING DIVISION\n\n";
     
-    if((in1*in2) >= pow(2,(decimal-1)) || (in1*in2) <= -1*(pow(2,(decimal-1))+1)){
+    if((in1/in2) >= pow(2,(decimal-1)) || (in1/in2) <= -1*(pow(2,(decimal-1))+1)){
         std::cout<< "Overflow detected\n";
     }
     printSuccess(simpleDiv(a,b), (double)in1/in2);
@@ -139,14 +142,14 @@ int main(){
 
     std::cout<< "\nTESTING MODULUS\n\n";
     
-    if((in1*in2) >= pow(2,(decimal-1)) || (in1*in2) <= -1*(pow(2,(decimal-1))+1)){
+    if(((int)in1%(int)in2) >= pow(2,(decimal-1)) || ((int)in1%(int)in2) <= -1*(pow(2,(decimal-1))+1)){
         std::cout<< "Overflow detected\n";
     }
     printSuccess(simpleMod(a,b), (int)in1%(int)in2);
 
 
 
-    
+
     return 0;
 }
 
