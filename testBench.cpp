@@ -13,6 +13,15 @@
 const unsigned int ARRAY[10] = {0,1,2,3,4,5,6,7,8,9};
 short unsigned const decimal = ARRAY[5], fractional=6;
 
+enum Operations {
+    ADD,
+    SUB,
+    MUL,
+    DIV,
+    MOD
+};
+
+
 FixedPoint<decimal, fractional> simpleAdd (FixedPoint<decimal, fractional> in1, FixedPoint<decimal, fractional> in2){
     
     FixedPoint<decimal, fractional> output = in1 + in2; 
@@ -45,6 +54,67 @@ FixedPoint<decimal, fractional> simpleMod (FixedPoint<decimal, fractional> in1, 
 
 
 
+void overflowDetection(double* x1, double* x2, Operations op){
+    switch(op){
+        case ADD:
+            if(*x1+*x2 >= pow(2,(decimal-1))){
+                std::cout<< "Overflow detected\n";
+            }
+            break;
+        case SUB:
+            if(*x1-*x2 >= pow(2,(decimal-1)) || *x1-*x2 <= -1*(pow(2,(decimal-1))+1)){
+                std::cout<< "Overflow detected\n";
+            }
+            break;
+        case MUL:
+            if((*x1)*(*x2) >= pow(2,(decimal-1)) || (*x1)*(*x2) <= -1*(pow(2,(decimal-1))+1)){
+                std::cout<< "Overflow detected\n";
+            }
+            break;
+        case DIV:
+            if((*x1)/(*x2) >= pow(2,(decimal-1)) || (*x1)/(*x2) <= -1*(pow(2,(decimal-1))+1)){
+                std::cout<< "Overflow detected\n";
+            }
+            break;
+        case MOD:
+            if(((int)*x1%(int)*x2) >= pow(2,(decimal-1)) || ((int)*x1%(int)*x2) <= -1*(pow(2,(decimal-1))+1)){
+                std::cout<< "Overflow detected\n";
+            }
+            break;
+    }
+}
+
+void edgeCases(double* x1, double* x2, Operations op){
+    switch(op){
+        case ADD:
+            *x1 = 0.75;
+            *x2 = 1.1;
+            std::cout<< *x1 << " + " << *x2 << std::endl;
+            break;
+        case SUB:
+            *x1 = 0.75;
+            *x2 = 1.1;
+            std::cout<< *x1 << " - " << *x2 << std::endl;
+            break;
+        case MUL:
+            *x1 = 0.75;
+            *x2 = 1.1;
+            std::cout<< *x1 << " * " << *x2 << std::endl;
+            break;
+        case DIV:
+            *x1 = 0.75;
+            *x2 = 1.1;
+            std::cout<< *x1 << " / " << *x2 << std::endl;
+            break;
+        case MOD:
+            *x1 = 5;
+            *x2 = (int)3;
+            std::cout<< *x1 << " % " << *x2 << std::endl;
+            break;
+    }
+}
+
+
 void printSuccess(FixedPoint<decimal, fractional> fxPoint, double dbl){
     
     double dblTemp = dbl;
@@ -71,83 +141,61 @@ void printSuccess(FixedPoint<decimal, fractional> fxPoint, double dbl){
     }
 }
 
-// void edgeCases()
 
 
-int main(){
+
+int main(const int argc, const char* argv[]){
+
+    // initialize variables
+    double in1, in2;
 
     // simple addition test
-    double in1 = 0.75, in2 = 1.1;
-    std::cout<< "TESTING ADDITION\n\n";
+    std::cout<< "TESTING ADDITION\n";
+    edgeCases(&in1, &in2, ADD);
     FixedPoint<decimal, fractional> a(in1);
     FixedPoint<decimal, fractional> b(in2);
-    
-    if(in1+in2 >= pow(2,(decimal-1))){
-        std::cout<< "Overflow detected\n";
-    }
-
+    overflowDetection(&in1, &in2, ADD);
     printSuccess(simpleAdd(a,b), (double)in1+in2);
 
 
     // simple subtraction test
-    in1 = 0.75, in2 = -1.0;
+    std::cout<< "\nTESTING SUBTRACTION\n";
+    edgeCases(&in1, &in2, SUB);
     a = FixedPoint<decimal, fractional>(in1);
     b = FixedPoint<decimal, fractional>(in2);
-
-    std::cout<< "\nTESTING SUBTRACTION\n\n";
-    if(in1-in2 >= pow(2,(decimal-1)) || in1-in2 <= -1*(pow(2,(decimal-1))+1)){
-        std::cout<< "Overflow detected\n";
-    }
-
+    overflowDetection(&in1, &in2, SUB);
     printSuccess(simpleAdd(a,b), (double)in1+in2);
 
 
 
-    // simple multiplication test
-    in1 = 2, in2 = 2;
-    
+    // simple multiplication test   
+    std::cout<< "\nTESTING MULTIPLICATION\n";
+    edgeCases(&in1, &in2, MUL); 
     a = FixedPoint<decimal, fractional>(in1);
     b = FixedPoint<decimal, fractional>(in2);
-
-    std::cout<< "\nTESTING MULTIPLICATION\n\n";
-    
-    if((in1*in2) >= pow(2,(decimal-1)) || (in1*in2) <= -1*(pow(2,(decimal-1))+1)){
-        std::cout<< "Overflow detected\n";
-    }
+    overflowDetection(&in1, &in2, MUL);
     printSuccess(simpleMul(a,b), (double)in1+in2);
 
 
 
 
     // simple division test
-    in1 = -2.5, in2 = 2.5;
-    
+    std::cout<< "\nTESTING DIVISION\n";
+    edgeCases(&in1, &in2, DIV);    
     a = FixedPoint<decimal, fractional>(in1);
-    b = FixedPoint<decimal, fractional>(in2);
-
-    std::cout<< "\nTESTING DIVISION\n\n";
-    
-    if((in1/in2) >= pow(2,(decimal-1)) || (in1/in2) <= -1*(pow(2,(decimal-1))+1)){
-        std::cout<< "Overflow detected\n";
-    }
+    b = FixedPoint<decimal, fractional>(in2); 
+    overflowDetection(&in1, &in2, DIV);
     printSuccess(simpleDiv(a,b), (double)in1/in2);
 
 
 
     // simple modulo test
-    in1 = 13, in2 = 2;
-    
+    std::cout<< "\nTESTING MODULUS\n";
+    edgeCases(&in1, &in2, MOD);
     a = FixedPoint<decimal, fractional>(in1);
     b = FixedPoint<decimal, fractional>(in2);
-
-    std::cout<< "\nTESTING MODULUS\n\n";
-    
-    if(((int)in1%(int)in2) >= pow(2,(decimal-1)) || ((int)in1%(int)in2) <= -1*(pow(2,(decimal-1))+1)){
-        std::cout<< "Overflow detected\n";
-    }
+    overflowDetection(&in1, &in2, MOD);
     printSuccess(simpleMod(a,b), (int)in1%(int)in2);
-
-
 
 
     return 0;
