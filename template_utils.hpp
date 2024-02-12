@@ -3,6 +3,13 @@
 
 #include <stdint.h>
 
+#include <boost/multiprecision/cpp_int.hpp>
+#include <boost/multiprecision/cpp_dec_float.hpp>
+
+
+using int256_t  = boost::multiprecision::number<boost::multiprecision::cpp_int_backend<256,  256,  boost::multiprecision::signed_magnitude, boost::multiprecision::unchecked, void>, boost::multiprecision::et_off>;
+
+
 // This is a dummy type meaning that there are too many bits in the data type
 struct TooManyBits;
 
@@ -48,6 +55,12 @@ struct GET_INT_WITH_LENGTH<64>
 
 template <>
 struct GET_INT_WITH_LENGTH<128>
+{
+    typedef __int128_t RESULT;
+};
+
+template <>
+struct GET_INT_WITH_LENGTH<256>
 {
     typedef TooManyBits RESULT;
 };
