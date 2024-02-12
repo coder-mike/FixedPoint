@@ -29,6 +29,8 @@ public:
     /// The integer type used internally to store the value
     typedef typename GET_INT_WITH_LENGTH<INT_BITS + FRAC_BITS>::RESULT RawType;
 
+    typedef typename GET_INT_WITH_LENGTH<INT_BITS*2 + FRAC_BITS*2>::RESULT MultType;
+
     /// This is a type big enough to hold the largest integer value
     typedef typename GET_INT_WITH_LENGTH<INT_BITS>::RESULT IntType;
 
@@ -53,7 +55,7 @@ public:
             value = -value;
         }
         raw_ = value << FRAC_BITS;
-        mask = (1 << (FRAC_BITS+INT_BITS)) - 1;
+        mask = (1LL << (FRAC_BITS+INT_BITS)) - 1;
         applyMask();
         if (is_neg){
             raw_ = -raw_;
@@ -67,7 +69,7 @@ public:
             value = -value;
         }
         raw_ = value * (1 << FRAC_BITS);
-        mask = (1 << (FRAC_BITS+INT_BITS)) - 1;
+        mask = (1LL << (FRAC_BITS+INT_BITS)) - 1;
         applyMask();
         if (is_neg){
             raw_ = -raw_;
@@ -81,7 +83,7 @@ public:
             value = -value;
         }
         raw_ = value * (1 << FRAC_BITS);
-        mask = (1 << (FRAC_BITS+INT_BITS)) - 1;
+        mask = (1LL << (FRAC_BITS+INT_BITS)) - 1;
         applyMask();
         if (is_neg){
             raw_ = -raw_;
@@ -95,7 +97,10 @@ public:
         applyMask();
     }
 
-    FixedPoint(RawValue value): raw_(value.value) { }
+    FixedPoint(RawValue value): raw_(value.value) {
+        //mask = (1LL << (FRAC_BITS+INT_BITS)) - 1LL;
+        //applyMask();
+    }
 
     void applyMask(){
         raw_ &= mask;
@@ -149,12 +154,46 @@ public:
         return FixedPoint<INT_BITS + INT_BITS2, FRAC_BITS + FRAC_BITS2>::createRaw(raw_ * value.getRaw());
     }
     */
+   /*
    FixedPoint<INT_BITS, FRAC_BITS>
    operator *(FixedPoint<INT_BITS, FRAC_BITS> value) const
     {
-        auto temp = FixedPoint<INT_BITS*2, FRAC_BITS*2>::createRaw(raw_ * value.getRaw());
+        int256_t raw_shifted = raw_;
+        int256_t value_shifted = value.getRaw();
+        //int256_t raw_shifted = raw_ << FRAC_BITS;
+        //int256_t value_shifted = value.getRaw() << FRAC_BITS;
+        std::cout << "raw_shifted: " << raw_shifted << std::endl;
+        std::cout << "value_shifted: " << value_shifted << std::endl;
+        int256_t temp = raw_shifted * value_shifted;
+        FixedPoint<INT_BITS*2, FRAC_BITS*2> temp_fp = FixedPoint<INT_BITS*2, FRAC_BITS*2>::createRaw(temp.convert_to<MultType>());
+        std::cout << "temp: " << temp_fp.getRaw() << std::endl;
+        // bitshift temp to the right
+        int256_t temp_raw = temp_fp.getRaw();
+        auto int_part = temp_raw >> (FRAC_BITS*2);
+        auto frac_part = temp_raw & ((1LL << (FRAC_BITS)) - 1);
+        std::cout << "int part: " << int_part << std::endl;
+        std::cout << "frac part: " << frac_part << std::endl;
+        //frac_part >>= FRAC_BITS*2;
+        int256_t result = (int_part << FRAC_BITS) + (frac_part);
+        return FixedPoint<INT_BITS, FRAC_BITS>::createRaw(result.convert_to<RawType>());
         // Now we need to shift the radix point back to the original position
-        return temp.template convert<INT_BITS, FRAC_BITS>();
+        //return temp.template convert<INT_BITS, FRAC_BITS>();
+    }
+    */
+    // https://vanhunteradams.com/FixedPoint/FixedPoint.html
+    FixedPoint<INT_BITS, FRAC_BITS>
+    operator *(FixedPoint<INT_BITS, FRAC_BITS> value) const
+    {
+        int256_t raw_shifted = raw_;
+        int256_t value_shifted = value.getRaw();
+        int256_t mult = raw_shifted * value_shifted;
+        // mask the last INT_BITS bits
+        int256_t tmp1 = mult << INT_BITS;
+        int256_t tmp2 = tmp1 >> INT_BITS;
+        mult = tmp2;
+        // get rid of underflow
+        mult >>= FRAC_BITS;
+        return FixedPoint<INT_BITS, FRAC_BITS>::createRaw(mult.convert_to<RawType>());
     }
     // Multiplication with an integer
     // The intermediate type is set to some arbitrary value, there may be a better way to do this
@@ -478,7 +517,7 @@ public:
     /// For debugging: return the number of bits after the radix
     int getFractionalLength() const { return FRAC_BITS; }
     /// Get the value as a floating point
-    double getValueF() const { return ((double)raw_)/(1 << FRAC_BITS); }
+    double getValueF() const { return ((double)raw_)/(1LL << FRAC_BITS); }
     /// Get the value truncated to an integer
     IntType getValue() const { return (IntType)(raw_ >> FRAC_BITS); }
     /// Get the value rounded to an integer (only works if FRAC_BITS > 0)
