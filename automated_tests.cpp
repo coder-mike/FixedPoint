@@ -4,7 +4,11 @@
 #include "fixed_point.hpp"
 #include "bad.hpp"
 
+#define CURR_TYPE FixedPoint<14, 18>
 
+bool double_equals(double a, double b, double epsilon = 0.1){
+    return std::abs(a - b) < epsilon;
+}
 
 int main(){
     // start reading tests.txt
@@ -22,10 +26,10 @@ int main(){
             }
             case '#':{// Assignment test
                 infile >> num1 >> num2;
-                auto p1 = (FixedPoint<8,8>*)get_type(n, m);
+                auto p1 = new CURR_TYPE;
                 *p1 = num1;
                 // now need to check if they are equal
-                if(*p1 == num2){
+                if(double_equals(p1->getValueF(), num2)){
                     outfile << "OK " << num1 << " == " << num2 << " " << *p1 << std::endl;
                 } else {
                     outfile << "FAIL " << num1 << " != " << num2 << " " << *p1 << std::endl;
@@ -34,12 +38,12 @@ int main(){
             }
             case '+':{// Addition test
                 infile >> num1 >> num2 >> num3;
-                auto p1 = (FixedPoint<8,8>*)get_type(n, m);
+                auto p1 = new CURR_TYPE;
                 *p1 = num1;
-                auto p2 = (FixedPoint<8,8>*)get_type(n, m);
+                auto p2 = new CURR_TYPE;
                 *p2 = num2;
                 // now need to check if they are equal
-                if(*p1 + *p2 == num3){
+                if(double_equals((*p1 + *p2).getValueF(), num3)){
                     outfile << "OK " << num1 << " + " << num2 << " == " << num3 << "==" << *p1 + *p2 << std::endl;
                 } else {
                     outfile << "FAIL " << num1 << " + " << num2 << " == " << *p1 << " + " << *p2 << " == " << *p1+*p2 << " != " << num3  << std::endl;
@@ -48,12 +52,12 @@ int main(){
             }
             case '-':{// Subtraction test
                 infile >> num1 >> num2 >> num3;
-                auto p1 = (FixedPoint<8,8>*)get_type(n, m);
+                auto p1 = new CURR_TYPE;
                 *p1 = num1;
-                auto p2 = (FixedPoint<8,8>*)get_type(n, m);
+                auto p2 = new CURR_TYPE;
                 *p2 = num2;
                 // now need to check if they are equal
-                if(*p1 - *p2 == num3){
+                if(double_equals((*p1 - *p2).getValueF(), num3)){
                     outfile << "OK " << num1 << " - " << num2 << " == " << num3 << "==" << *p1 - *p2 << std::endl;
                 } else {
                     outfile << "FAIL " << num1 << " - " << num2 << " == " << *p1 << " - " << *p2 << " == " << *p1-*p2 << " != " << num3  << std::endl;
@@ -62,12 +66,12 @@ int main(){
             }
             case '*':{// Multiplication test
                 infile >> num1 >> num2 >> num3;
-                auto p1 = (FixedPoint<8,8>*)get_type(n, m);
+                auto p1 = new CURR_TYPE;
                 *p1 = num1;
-                auto p2 = (FixedPoint<8,8>*)get_type(n, m);
+                auto p2 = new CURR_TYPE;
                 *p2 = num2;
                 // now need to check if they are equal
-                if(*p1 * *p2 == num3){
+                if(double_equals((*p1 * *p2).getValueF(), num3)){
                     outfile << "OK " << num1 << " * " << num2 << " == " << num3 << "==" << *p1 * *p2 << std::endl;
                 } else {
                     outfile << "FAIL " << num1 << " * " << num2 << " == " << *p1 << " * " << *p2 << " == " << *p1 * *p2 << " != " << num3  << std::endl;
