@@ -71,7 +71,15 @@ public:
             }
         }
         else{
-            ;
+            if(value > max_val){
+                raw_ = max_val;
+            }
+            else if(value < min_val){
+                raw_ = min_val;
+            }
+            else{
+                raw_ = value << FRAC_BITS;
+            }
         }
     }
 
@@ -90,7 +98,15 @@ public:
             }
         }
         else{
-            ;
+            if(value > max_val_f){
+                raw_ = max_val;
+            }
+            else if(value < min_val_f){
+                raw_ = min_val;
+            }
+            else{
+                raw_ = value * (1 << FRAC_BITS);
+            }
         }
     }
 
@@ -110,7 +126,15 @@ public:
             }
         }
         else{
-            ;
+            if(value > max_val_f){
+                raw_ = max_val;
+            }
+            else if(value < min_val_f){
+                raw_ = min_val;
+            }
+            else{
+                raw_ = value * (1 << FRAC_BITS);
+            }
         }
     }
 
@@ -562,6 +586,8 @@ private:
     __int128_t mask;
     __int128_t max_val = (__int128_t)(((int256_t)1 << (FRAC_BITS+INT_BITS-1)) - 1);
     __int128_t min_val = -(__int128_t)(((__int128_t)1 << (FRAC_BITS+INT_BITS-1)));
+    double max_val_f = (double)max_val/(1LL << FRAC_BITS);
+    double min_val_f = (double)min_val/(1LL << FRAC_BITS);
 };
 
 // Make the fixed-point struct  ostream outputtable

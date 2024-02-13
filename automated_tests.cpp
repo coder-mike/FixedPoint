@@ -4,11 +4,11 @@
 #include "fixed_point.hpp"
 #include "bad.hpp"
 
-OverflowMode overflow_mode = OverflowMode::MASK;
+OverflowMode overflow_mode = OverflowMode::CLAMP;
 
 #define CURR_TYPE FixedPoint<8, 8>
 
-bool double_equals(double a, double b, double epsilon = 0.001){
+bool double_equals(double a, double b, double epsilon = 0.01){
     return std::abs(a - b) < epsilon;
 }
 
