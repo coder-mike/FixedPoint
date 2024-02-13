@@ -4,9 +4,11 @@
 #include "fixed_point.hpp"
 #include "bad.hpp"
 
-#define CURR_TYPE FixedPoint<14, 18>
+OverflowMode overflow_mode = OverflowMode::MASK;
 
-bool double_equals(double a, double b, double epsilon = 0.1){
+#define CURR_TYPE FixedPoint<8, 8>
+
+bool double_equals(double a, double b, double epsilon = 0.001){
     return std::abs(a - b) < epsilon;
 }
 
@@ -30,9 +32,9 @@ int main(){
                 *p1 = num1;
                 // now need to check if they are equal
                 if(double_equals(p1->getValueF(), num2)){
-                    outfile << "OK " << num1 << " == " << num2 << " " << *p1 << std::endl;
+                    outfile << "OK " << num1 << " == " << num2 << " " << p1->getValueF() << std::endl;
                 } else {
-                    outfile << "FAIL " << num1 << " != " << num2 << " " << *p1 << std::endl;
+                    outfile << "FAIL " << num1 << " != " << num2 << " " << p1->getValueF() << std::endl;
                 }
                 break;
             }

@@ -7,6 +7,14 @@
 
 #include "template_utils.hpp"
 
+enum OverflowMode
+{
+    MASK,
+    CLAMP
+};
+
+extern OverflowMode overflow_mode;
+
 /// A fixed-point integer type
 /** \tparam INT_BITS The number of bits before the radix point
  *  \tparam FRAC_BITS The number of bits after the radix point
@@ -50,43 +58,59 @@ public:
     /// Create a fixed-point with equivalent integer value
     /** For example in 4.12 fixed-point, the number "2" is 0010.000000000000  */
     FixedPoint(int value){
-        bool is_neg = value < 0;
-        if (is_neg){
-            value = -value;
+        if(overflow_mode == OverflowMode::MASK){
+            bool is_neg = value < 0;
+            if (is_neg){
+                value = -value;
+            }
+            raw_ = value << FRAC_BITS;
+            mask = (1LL << (FRAC_BITS+INT_BITS)) - 1;
+            applyMask();
+            if (is_neg){
+                raw_ = -raw_;
+            }
         }
-        raw_ = value << FRAC_BITS;
-        mask = (1LL << (FRAC_BITS+INT_BITS)) - 1;
-        applyMask();
-        if (is_neg){
-            raw_ = -raw_;
+        else{
+            ;
         }
     }
 
     // Terrible negative number handling, will fix it
     FixedPoint(double value){
-        bool is_neg = value < 0;
-        if (is_neg){
-            value = -value;
+        if(overflow_mode == OverflowMode::MASK){
+            bool is_neg = value < 0;
+            if (is_neg){
+                value = -value;
+            }
+            raw_ = value * (1 << FRAC_BITS);
+            mask = (1LL << (FRAC_BITS+INT_BITS)) - 1;
+            applyMask();
+            if (is_neg){
+                raw_ = -raw_;
+            }
         }
-        raw_ = value * (1 << FRAC_BITS);
-        mask = (1LL << (FRAC_BITS+INT_BITS)) - 1;
-        applyMask();
-        if (is_neg){
-            raw_ = -raw_;
+        else{
+            ;
         }
     }
 
     // Terrible negative number handling, will fix it
+    // MASK MAY BE BUGGY TODO: 
     FixedPoint(float value){
-        bool is_neg = value < 0;
-        if (is_neg){
-            value = -value;
+        if(overflow_mode == OverflowMode::MASK){
+            bool is_neg = value < 0;
+            if (is_neg){
+                value = -value;
+            }
+            raw_ = value * (1 << FRAC_BITS);
+            mask = (1LL << (FRAC_BITS+INT_BITS)) - 1;
+            applyMask();
+            if (is_neg){
+                raw_ = -raw_;
+            }
         }
-        raw_ = value * (1 << FRAC_BITS);
-        mask = (1LL << (FRAC_BITS+INT_BITS)) - 1;
-        applyMask();
-        if (is_neg){
-            raw_ = -raw_;
+        else{
+            ;
         }
     }
 
@@ -94,11 +118,11 @@ public:
     FixedPoint(){
         raw_ = 0;
         mask = (1LL << (FRAC_BITS+INT_BITS)) - 1;
-        applyMask();
+       //applyMask();
     }
 
     FixedPoint(RawValue value): raw_(value.value) {
-        //mask = (1LL << (FRAC_BITS+INT_BITS)) - 1LL;
+        mask = (1LL << (FRAC_BITS+INT_BITS)) - 1LL;
         //applyMask();
     }
 
@@ -517,7 +541,9 @@ public:
     /// For debugging: return the number of bits after the radix
     int getFractionalLength() const { return FRAC_BITS; }
     /// Get the value as a floating point
-    double getValueF() const { return ((double)raw_)/(1LL << FRAC_BITS); }
+    double getValueF() const { 
+        std::cout << "double val is " << (raw_)/(double)(1LL << FRAC_BITS) << std::endl;
+        return (raw_)/(double)(1LL << FRAC_BITS); }
     /// Get the value truncated to an integer
     IntType getValue() const { return (IntType)(raw_ >> FRAC_BITS); }
     /// Get the value rounded to an integer (only works if FRAC_BITS > 0)
@@ -534,6 +560,8 @@ private:
 
     RawType raw_;
     __int128_t mask;
+    __int128_t max_val = (__int128_t)(((int256_t)1 << (FRAC_BITS+INT_BITS-1)) - 1);
+    __int128_t min_val = -(__int128_t)(((__int128_t)1 << (FRAC_BITS+INT_BITS-1)));
 };
 
 // Make the fixed-point struct  ostream outputtable
