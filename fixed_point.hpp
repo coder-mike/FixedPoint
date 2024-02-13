@@ -241,7 +241,21 @@ public:
         mult = tmp2;
         // get rid of underflow
         mult >>= FRAC_BITS;
-        return FixedPoint<INT_BITS, FRAC_BITS>::createRaw(mult.convert_to<RawType>());
+        if(overflow_mode == OverflowMode::MASK){
+            return FixedPoint<INT_BITS, FRAC_BITS>::createRaw(mult.convert_to<RawType>());
+        }
+        else{
+            if(mult > max_val){
+                return FixedPoint<INT_BITS, FRAC_BITS>::createRaw(max_val);
+            }
+            else if(mult < min_val){
+                return FixedPoint<INT_BITS, FRAC_BITS>::createRaw(min_val);
+            }
+            else{
+                return FixedPoint<INT_BITS, FRAC_BITS>::createRaw(mult.convert_to<RawType>());
+            }
+        }
+        //return FixedPoint<INT_BITS, FRAC_BITS>::createRaw(mult.convert_to<RawType>());
     }
     // Multiplication with an integer
     // The intermediate type is set to some arbitrary value, there may be a better way to do this
@@ -264,18 +278,51 @@ public:
     FixedPoint<INT_BITS, FRAC_BITS>& operator*=(FixedPoint<INT_BITS, FRAC_BITS> value)
     {
         raw_ *= value.template convert<INT_BITS, FRAC_BITS>().getRaw();
+        if(overflow_mode == OverflowMode::MASK){
+            applyMask();
+        }
+        else{
+            if(raw_ > max_val){
+                raw_ = max_val;
+            }
+            else if(raw_ < min_val){
+                raw_ = min_val;
+            }
+        }
         return *this;
     }
 
     FixedPoint<INT_BITS, FRAC_BITS>& operator*=(int value)
     {
         raw_ *= FixedPoint<INT_BITS, FRAC_BITS>(value).getRaw();
+        if(overflow_mode == OverflowMode::MASK){
+            applyMask();
+        }
+        else{
+            if(raw_ > max_val){
+                raw_ = max_val;
+            }
+            else if(raw_ < min_val){
+                raw_ = min_val;
+            }
+        }
         return *this;
     }
 
     FixedPoint<INT_BITS, FRAC_BITS>& operator*=(double value)
     {
         raw_ *= FixedPoint<INT_BITS, FRAC_BITS>(value).getRaw();
+        if(overflow_mode == OverflowMode::MASK){
+            applyMask();
+        }
+        else{
+            if(raw_ > max_val){
+                raw_ = max_val;
+            }
+            else if(raw_ < min_val){
+                raw_ = min_val;
+            }
+        }
         return *this;
     }
 
@@ -314,9 +361,6 @@ public:
                 return ResultType::createRaw(op1.getRaw() + op2.getRaw());
             }
         }
-
-        // Then the addition is trivial
-        return ResultType::createRaw(op1.getRaw() + op2.getRaw());
     }
 
     FixedPoint<INT_BITS, FRAC_BITS> operator +(float value) const
@@ -358,6 +402,17 @@ public:
     ThisType& operator-=(FixedPoint<INT_BITS, FRAC_BITS> value)
     {
         raw_ -= value.template convert<INT_BITS, FRAC_BITS>().getRaw();
+        if(overflow_mode == OverflowMode::MASK){
+            applyMask();
+        }
+        else{
+            if(raw_ > max_val){
+                raw_ = max_val;
+            }
+            else if(raw_ < min_val){
+                raw_ = min_val;
+            }
+        }
         return *this;
     }
 
@@ -372,13 +427,27 @@ public:
         ResultType op1(this->convert<INT_BITS, FRAC_BITS>());
         ResultType op2(value.template convert<INT_BITS, FRAC_BITS>());
 
-        // Then the addition is trivial
-        return ResultType::createRaw(op1.getRaw() - op2.getRaw());
+        if(overflow_mode == OverflowMode::MASK){
+            return ResultType::createRaw(op1.getRaw() - op2.getRaw());
+        }
+        else{
+            double val1 = op1.getValueF();
+            double val2 = op2.getValueF();
+            double result = val1 - val2;
+            if(result > max_val_f){
+                return ResultType::createRaw(max_val);
+            }
+            else if(result < min_val_f){
+                return ResultType::createRaw(min_val);
+            }
+            else{
+                return ResultType::createRaw(op1.getRaw() - op2.getRaw());
+            }
+        }
     }
 
     /// Subtraction operator
-    FixedPoint<INT_BITS, FRAC_BITS>
-        operator-(double value) const
+    FixedPoint<INT_BITS, FRAC_BITS> operator-(double value) const
     {
         return *this - FixedPoint<INT_BITS, FRAC_BITS>(value);
     }
