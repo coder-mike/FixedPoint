@@ -80,6 +80,32 @@ int main(){
                 }
                 break;
             }
+            case '/':{// Division test
+                infile >> num1 >> num2 >> num3;
+                auto p1 = new CURR_TYPE;
+                *p1 = num1;
+                auto p2 = new CURR_TYPE;
+                *p2 = num2;
+                // now need to check if they are equal
+                if(double_equals((*p1 / *p2).getValueF(), num3)){
+                    outfile << "OK " << num1 << " / " << num2 << " == " << num3 << "==" << *p1 / *p2 << std::endl;
+                } else {
+                    outfile << "FAIL " << num1 << " / " << num2 << " == " << *p1 << " / " << *p2 << " == " << *p1 / *p2 << " != " << num3  << std::endl;
+                }
+                break;
+            }
+            case '(':{//Unary minus test
+                infile >> num1 >> num2;
+                auto p1 = new CURR_TYPE;
+                *p1 = num1;
+                // now need to check if they are equal
+                if(double_equals(-(*p1).getValueF(), num2)){
+                    outfile << "OK -" << num1 << " == " << num2 << "==" << -(*p1) << std::endl;
+                } else {
+                    outfile << "FAIL -" << num1 << " == " << *p1 << " != " << num2  << std::endl;
+                }
+                break;
+            }
             default:{
                 std::cout << "Unknown optype: " << optype << std::endl;
                 return 0;
