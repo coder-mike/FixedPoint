@@ -297,12 +297,28 @@ public:
         ResultType op1(this->convert<INT_BITS, FRAC_BITS>());
         ResultType op2(value.template convert<INT_BITS, FRAC_BITS>());
 
+        if(overflow_mode == OverflowMode::MASK){
+            return ResultType::createRaw(op1.getRaw() + op2.getRaw());
+        }
+        else{
+            double val1 = op1.getValueF();
+            double val2 = op2.getValueF();
+            double result = val1 + val2;
+            if(result > max_val_f){
+                return ResultType::createRaw(max_val);
+            }
+            else if(result < min_val_f){
+                return ResultType::createRaw(min_val);
+            }
+            else{
+                return ResultType::createRaw(op1.getRaw() + op2.getRaw());
+            }
+        }
+
         // Then the addition is trivial
         return ResultType::createRaw(op1.getRaw() + op2.getRaw());
     }
 
-    // Addition with an integer
-    // This is again not totally correct...
     FixedPoint<INT_BITS, FRAC_BITS> operator +(float value) const
     {
         return *this + FixedPoint<INT_BITS, FRAC_BITS>(value);
@@ -311,9 +327,21 @@ public:
     ThisType& operator+=(FixedPoint<INT_BITS, FRAC_BITS> value)
     {
         raw_ += value.template convert<INT_BITS, FRAC_BITS>().getRaw();
+        if(overflow_mode == OverflowMode::MASK){
+            applyMask();
+        }
+        else{
+            if(raw_ > max_val){
+                raw_ = max_val;
+            }
+            else if(raw_ < min_val){
+                raw_ = min_val;
+            }
+        }
         return *this;
     }
 
+    /*
     ThisType& operator+=(IntType value)
     {
         raw_ += ThisType(value).getRaw();
@@ -325,6 +353,7 @@ public:
         raw_ -= ThisType(value).getRaw();
         return *this;
     }
+    */
 
     ThisType& operator-=(FixedPoint<INT_BITS, FRAC_BITS> value)
     {
