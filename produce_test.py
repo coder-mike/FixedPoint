@@ -5,8 +5,8 @@ from tqdm import tqdm
 output_file = "tests.txt"
 
 NUM_TESTS = 1e2
-MIN_BOUND = -5
-MAX_BOUND = 5
+MIN_BOUND = -100
+MAX_BOUND = 100
 
 # Let's say that every line in the file will be a test
 # If the line starts with #, it means it is an assignment test
@@ -22,7 +22,7 @@ MAX_BOUND = 5
 # If the line starts with a !, it means the next two numbers are the new integer and fractional bits
 # Do I need anything else?
 
-OVERFLOW_MODE = 'wrap'
+OVERFLOW_MODE = 'clamp'
 ROUNDING_MODE = 'down'
 
 def assignment_test(n, m):
@@ -45,7 +45,12 @@ def addition_test(n, m):
         # convert to fixed point
         fixed_num1 = FixedPoint(num1, True, n, m, overflow=OVERFLOW_MODE, rounding=ROUNDING_MODE, overflow_alert='ignore')
         fixed_num2 = FixedPoint(num2, True, n, m, overflow=OVERFLOW_MODE, rounding=ROUNDING_MODE, overflow_alert='ignore')
-        summ = float(FixedPoint(float(fixed_num1 + fixed_num2), True, n, m, overflow=OVERFLOW_MODE, rounding=ROUNDING_MODE, overflow_alert='ignore'))
+        #fixed_num1.clamp(n-1)
+        #fixed_num2.clamp(n-1)
+        summ = fixed_num1 + fixed_num2
+        summ = float(summ)
+        summ = FixedPoint(summ, True, n, m, overflow=OVERFLOW_MODE, rounding=ROUNDING_MODE, overflow_alert='ignore')
+        summ = float(summ)
         # write to file
         with open(output_file, 'a') as f:
             f.write(f"+ {num1} {num2} {summ}\n")
@@ -102,7 +107,7 @@ def unary_minus_test(n, m):
         fixed_num =float( FixedPoint(num, True, n, m, overflow=OVERFLOW_MODE, rounding=ROUNDING_MODE, overflow_alert='ignore'))
         # write to file
         with open(output_file, 'a') as f:
-            f.write(f"-- {num} {-fixed_num}\n")
+            f.write(f"( {num} {-fixed_num}\n")
 
 def equality_test(n, m):
     # use tqdm for loop
@@ -148,11 +153,11 @@ def test_num(N, M):
     with open(output_file, 'a') as f:
         f.write(f"! {N} {M}\n")
     assignment_test(N, M)
-    #addition_test(N, M)
-    #subtraction_test(N, M)
-    #multiplication_test(N, M)
+    addition_test(N, M)
+    subtraction_test(N, M)
+    multiplication_test(N, M)
     #division_test(N, M)
-    #unary_minus_test(N, M)
+    unary_minus_test(N, M)
     #equality_test(N, M)
     #less_than_test(N, M)
     #greater_than_test(N, M)

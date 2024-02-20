@@ -4,7 +4,7 @@
 #include "fixed_point.hpp"
 #include "bad.hpp"
 
-OverflowMode overflow_mode = OverflowMode::CLAMP;
+OverflowMode OVERFLOW_MODE = OverflowMode::CLAMP;
 
 #define CURR_TYPE FixedPoint<8, 8>
 

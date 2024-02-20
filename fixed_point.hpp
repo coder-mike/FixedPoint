@@ -13,7 +13,7 @@ enum OverflowMode
     CLAMP
 };
 
-extern OverflowMode overflow_mode;
+extern OverflowMode OVERFLOW_MODE;
 
 /// A fixed-point integer type
 /** \tparam INT_BITS The number of bits before the radix point
@@ -58,7 +58,7 @@ public:
     /// Create a fixed-point with equivalent integer value
     /** For example in 4.12 fixed-point, the number "2" is 0010.000000000000  */
     FixedPoint(int value){
-        if(overflow_mode == OverflowMode::MASK){
+        if(OVERFLOW_MODE == OverflowMode::MASK){
             bool is_neg = value < 0;
             if (is_neg){
                 value = -value;
@@ -85,7 +85,7 @@ public:
 
     // Terrible negative number handling, will fix it
     FixedPoint(double value){
-        if(overflow_mode == OverflowMode::MASK){
+        if(OVERFLOW_MODE == OverflowMode::MASK){
             bool is_neg = value < 0;
             if (is_neg){
                 value = -value;
@@ -113,7 +113,7 @@ public:
     // Terrible negative number handling, will fix it
     // MASK MAY BE BUGGY TODO: 
     FixedPoint(float value){
-        if(overflow_mode == OverflowMode::MASK){
+        if(OVERFLOW_MODE == OverflowMode::MASK){
             bool is_neg = value < 0;
             if (is_neg){
                 value = -value;
@@ -146,7 +146,7 @@ public:
     }
 
     FixedPoint(RawValue value): raw_(value.value) {
-        mask = (1LL << (FRAC_BITS+INT_BITS)) - 1LL;
+        mask = (((__int128_t)1) << (FRAC_BITS+INT_BITS)) - ((__int128_t)1);
         //applyMask();
     }
 
@@ -241,7 +241,7 @@ public:
         mult = tmp2;
         // get rid of underflow
         mult >>= FRAC_BITS;
-        if(overflow_mode == OverflowMode::MASK){
+        if(OVERFLOW_MODE == OverflowMode::MASK){
             return FixedPoint<INT_BITS, FRAC_BITS>::createRaw(mult.convert_to<RawType>());
         }
         else{
@@ -278,7 +278,7 @@ public:
     FixedPoint<INT_BITS, FRAC_BITS>& operator*=(FixedPoint<INT_BITS, FRAC_BITS> value)
     {
         raw_ *= value.template convert<INT_BITS, FRAC_BITS>().getRaw();
-        if(overflow_mode == OverflowMode::MASK){
+        if(OVERFLOW_MODE == OverflowMode::MASK){
             applyMask();
         }
         else{
@@ -295,7 +295,7 @@ public:
     FixedPoint<INT_BITS, FRAC_BITS>& operator*=(int value)
     {
         raw_ *= FixedPoint<INT_BITS, FRAC_BITS>(value).getRaw();
-        if(overflow_mode == OverflowMode::MASK){
+        if(OVERFLOW_MODE == OverflowMode::MASK){
             applyMask();
         }
         else{
@@ -312,7 +312,7 @@ public:
     FixedPoint<INT_BITS, FRAC_BITS>& operator*=(double value)
     {
         raw_ *= FixedPoint<INT_BITS, FRAC_BITS>(value).getRaw();
-        if(overflow_mode == OverflowMode::MASK){
+        if(OVERFLOW_MODE == OverflowMode::MASK){
             applyMask();
         }
         else{
@@ -344,7 +344,7 @@ public:
         ResultType op1(this->convert<INT_BITS, FRAC_BITS>());
         ResultType op2(value.template convert<INT_BITS, FRAC_BITS>());
 
-        if(overflow_mode == OverflowMode::MASK){
+        if(OVERFLOW_MODE == OverflowMode::MASK){
             return ResultType::createRaw(op1.getRaw() + op2.getRaw());
         }
         else{
@@ -371,7 +371,7 @@ public:
     ThisType& operator+=(FixedPoint<INT_BITS, FRAC_BITS> value)
     {
         raw_ += value.template convert<INT_BITS, FRAC_BITS>().getRaw();
-        if(overflow_mode == OverflowMode::MASK){
+        if(OVERFLOW_MODE == OverflowMode::MASK){
             applyMask();
         }
         else{
@@ -402,7 +402,7 @@ public:
     ThisType& operator-=(FixedPoint<INT_BITS, FRAC_BITS> value)
     {
         raw_ -= value.template convert<INT_BITS, FRAC_BITS>().getRaw();
-        if(overflow_mode == OverflowMode::MASK){
+        if(OVERFLOW_MODE == OverflowMode::MASK){
             applyMask();
         }
         else{
@@ -427,7 +427,7 @@ public:
         ResultType op1(this->convert<INT_BITS, FRAC_BITS>());
         ResultType op2(value.template convert<INT_BITS, FRAC_BITS>());
 
-        if(overflow_mode == OverflowMode::MASK){
+        if(OVERFLOW_MODE == OverflowMode::MASK){
             return ResultType::createRaw(op1.getRaw() - op2.getRaw());
         }
         else{
@@ -664,7 +664,7 @@ public:
     int getFractionalLength() const { return FRAC_BITS; }
     /// Get the value as a floating point
     double getValueF() const { 
-        std::cout << "double val is " << (raw_)/(double)(1LL << FRAC_BITS) << std::endl;
+        //std::cout << "double val is " << (raw_)/(double)(1LL << FRAC_BITS) << std::endl;
         return (raw_)/(double)(1LL << FRAC_BITS); }
     /// Get the value truncated to an integer
     IntType getValue() const { return (IntType)(raw_ >> FRAC_BITS); }
